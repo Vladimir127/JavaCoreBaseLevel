@@ -5,17 +5,31 @@ import java.util.Scanner;
 
 public class XOGame {
 
+    /** Знак, который ставит игрок-человек */
     public static final char HUMAN_DOT = 'X';
+
+    /** Знак, который ставит игрок-компьютер */
     public static final char PC_DOT = 'O';
+
+    /** Знак пустой клетки */
     public static final char EMPTY_DOT = '_';
 
+    /** Сканер для считывания символов с консли */
     public static final Scanner SCANNER = new Scanner(System.in);
+
+    /** Объект Random для генерации случайных чисел */
     public static final Random RANDOM = new Random();
 
+    /** Игровое поле */
     public static char[][] map;
+
+    /** Ширина игрового поля */
     public static int mapSizeX;
+
+    /** Высота игрового поля */
     public static int mapSizeY;
 
+    /** Инициализирует игровое поле */
     public static void initMap(){
         mapSizeX = 3;
         mapSizeY = 3;
@@ -28,6 +42,7 @@ public class XOGame {
         }
     }
 
+    /** Выводит на консоль игровое поле с крестиками и ноликами */
     public static void printMap(){
         for (int y = 0; y < mapSizeY; y++) {
             for (int x = 0; x < mapSizeX; x++) {
@@ -38,11 +53,10 @@ public class XOGame {
         System.out.println();
     }
 
+    /** Выполняет ход пользователя: запрашивает у него координаты клетки, проверяет кооректность ввода и ставит в эту клетку знак */
     public static void humanTurn(){
         int x;
         int y;
-
-
 
         do {
             System.out.println("Введите свои координаты: ");
@@ -51,11 +65,9 @@ public class XOGame {
         } while (!isValidCell(y,x) || !isEmptyCell(y, x));
 
         map[y][x] = HUMAN_DOT;
-
-
-
     }
 
+    /** Выполняет ход компьютера. Случайным образом генерирует координаты клетки и ставит в эту клетку знак */
     public static void aiTurn(){
         int x;
         int y;
@@ -66,17 +78,33 @@ public class XOGame {
         } while (!isEmptyCell(y, x));
 
         map[y][x] = PC_DOT;
-
     }
 
+    /**
+     * Проверяет координаты клетки на валидность
+     * @param y Координата Y
+     * @param x Координата X
+     * @return Истина, если эти координаты находятся внутри игрового поля, и ложь, если они выходят за пределы поля
+     */
     public static boolean isValidCell(int y, int x){
         return x >= 0 && x < mapSizeX && y >= 0 && y < mapSizeY;
     }
 
+    /**
+     * Проверяет клетку на пустоту
+     * @param y Координата Y
+     * @param x Координата X
+     * @return Истина, если клетка пустая, иначе ложь
+     */
     public static boolean isEmptyCell(int y, int x){
         return map[y][x] == EMPTY_DOT;
     }
 
+    /**
+     * Проверяет, не победила ли одна из сторон
+     * @param inboxChar Знак игрока или компьютера
+     * @return Истина, если одна из сторон победила, иначе ложь
+     */
     public static boolean checkWin(char inboxChar){
         if (map[0][0] == inboxChar && map[0][1] == inboxChar && map[0][2] == inboxChar) return true;
         if (map[1][0] == inboxChar && map[1][1] == inboxChar && map[1][2] == inboxChar) return true;
@@ -92,6 +120,10 @@ public class XOGame {
         return false;
     }
 
+    /**
+     * Проверяет, не заполнилось ли игровое поле (ничья)
+     * @return Истина, если игровое поле заполнилось, иначе ложь
+     */
     public  static boolean isMapFull(){
         for (int y = 0; y < mapSizeY; y++) {
             for (int x = 0; x < mapSizeX; x++) {
@@ -102,10 +134,14 @@ public class XOGame {
     }
 
     public static void main(String[] args) {
+        // Инициализируем и выводим на консоль игровое поле
         initMap();
         printMap();
 
+        // В бесконечном цикле начинаем игру
         while (true){
+            // Предоставляем ход игроку и выводим на консоль игровое поле,
+            // после чего выполняем проверку на победу или ничью
             humanTurn();
             printMap();
             if (checkWin(HUMAN_DOT)){
@@ -117,6 +153,7 @@ public class XOGame {
                 break;
             }
 
+            // Далее аналогичным образом ходит компьютер
             aiTurn();
             printMap();
             if (checkWin(PC_DOT)){
