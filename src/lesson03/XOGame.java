@@ -29,10 +29,14 @@ public class XOGame {
     /** Высота игрового поля */
     public static int mapSizeY;
 
+    /** Длина выигрышной комбинации */
+    public static int winLength;
+
     /** Инициализирует игровое поле */
     public static void initMap(){
-        mapSizeX = 3;
-        mapSizeY = 3;
+        mapSizeX = 5;
+        mapSizeY = 5;
+        winLength = 4;
         map = new char[mapSizeY][mapSizeX];
 
         for (int y = 0; y < mapSizeY; y++) {
@@ -106,16 +110,90 @@ public class XOGame {
      * @return Истина, если одна из сторон победила, иначе ложь
      */
     public static boolean checkWin(char inboxChar){
-        if (map[0][0] == inboxChar && map[0][1] == inboxChar && map[0][2] == inboxChar) return true;
-        if (map[1][0] == inboxChar && map[1][1] == inboxChar && map[1][2] == inboxChar) return true;
-        if (map[2][0] == inboxChar && map[2][1] == inboxChar && map[2][2] == inboxChar) return true;
+        for (int y = 0; y < mapSizeY; y++) {
+            for (int x = 0; x < mapSizeX; x++) {
+                if (checkWinForCell(y, x, inboxChar)){
+                    return true;
+                }
+            }
+        }
 
-        if (map[0][0] == inboxChar && map[1][0] == inboxChar && map[2][0] == inboxChar) return true;
-        if (map[0][1] == inboxChar && map[1][1] == inboxChar && map[2][1] == inboxChar) return true;
-        if (map[0][2] == inboxChar && map[1][2] == inboxChar && map[2][2] == inboxChar) return true;
+        return false;
+    }
 
-        if (map[0][0] == inboxChar && map[1][1] == inboxChar && map[2][2] == inboxChar) return true;
-        if (map[0][2] == inboxChar && map[1][1] == inboxChar && map[2][0] == inboxChar) return true;
+    /**
+     * Проверяет, не начинается ли из этой клетки победная комбинация (по горизонтали, вертикали или диагонали)
+     * @param y Координата Y
+     * @param x Координата X
+     * @return Истина, если из этой клетки начинается победная комбинация, иначе ложь
+     */
+    private static boolean checkWinForCell(int y, int x, char inboxChar) {
+        /** Длина ряда крестиков или ноликов */
+        int length = 0;
+
+        // Двигаемся по горизонтали
+        // Начальная позиция - координата x, переданная в этот метод в качестве параметра
+        // Конечная позиция - ширина поля
+        for (int i = x; i < mapSizeX; i++) {
+
+            // Номер строки остаётся одним и тем же (координата y).
+            // Если каждый перебираемый символ равен нужному символу, увеличиваем длину ряда.
+            // Иначе (если наткнулись на другой символ), прерываем цикл
+            if (map[y][i] == inboxChar){
+                length++;
+            } else {
+                break;
+            }
+
+            // После каждой итерации проверяем, достигла ли длина ряда значения, достаточного для победы.
+            // Если достигла, возвращаем true.
+            if (length == winLength){
+                return true;
+            }
+        }
+
+        // Двигаемся по вертикали
+        length = 0;
+        for (int i = y; i < mapSizeY; i++) {
+            if (map[i][x] == inboxChar){
+                length++;
+            } else {
+                break;
+            }
+
+            if (length == winLength){
+                return true;
+            }
+        }
+
+        // Двигаемся по главной диагонали (вправо и вниз). В этом случае увеличиваем значения обоих итераторов на 1
+        length = 0;
+        for (int i = y, j = x; i < mapSizeY && j < mapSizeX; i++, j++) {
+            if (map[i][j] == inboxChar){
+                length++;
+            } else {
+                break;
+            }
+
+            if (length == winLength){
+                return true;
+            }
+        }
+
+        // Двигаемся по второстепенной диагонали (влево и вниз). В этом случае итератор i, который идёт по строкам, увеличивается,
+        // а итератор j, который идёт по столбцам, уменьшается
+        length = 0;
+        for (int i = y, j = mapSizeX - 1; i < mapSizeY && j >= 0; i++, j--) {
+            if (map[i][j] == inboxChar){
+                length++;
+            } else {
+                break;
+            }
+
+            if (length == winLength){
+                return true;
+            }
+        }
 
         return false;
     }
