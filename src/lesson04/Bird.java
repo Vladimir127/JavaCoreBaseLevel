@@ -9,7 +9,7 @@ public class Bird extends Animal {
      * @param swimLimit Ограничение по плаванию
      * @param jumpLimit Ограничение по прыжку
      */
-    public Bird(String name, int runLimit, int swimLimit, int jumpLimit) {
-        super(name, runLimit, swimLimit, jumpLimit);
+    public Bird(String name, float runLimit, float swimLimit, float jumpLimit) {
+        super("Птица", name, runLimit, swimLimit, jumpLimit);
     }
 }

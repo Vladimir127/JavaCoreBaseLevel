@@ -9,7 +9,7 @@ public class Horse extends Animal {
      * @param swimLimit Ограничение по плаванию
      * @param jumpLimit Ограничение по прыжку
      */
-    public Horse(String name, int runLimit, int swimLimit, int jumpLimit) {
-        super(name, runLimit, swimLimit, jumpLimit);
+    public Horse(String name, float runLimit, float swimLimit, float jumpLimit) {
+        super("Лошадь", name, runLimit, swimLimit, jumpLimit);
     }
 }

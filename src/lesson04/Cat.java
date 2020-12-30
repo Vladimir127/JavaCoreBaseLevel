@@ -9,7 +9,7 @@ public class Cat extends Animal {
      * @param swimLimit Ограничение по плаванию
      * @param jumpLimit Ограничение по прыжку
      */
-    public Cat(String name, int runLimit, int swimLimit, int jumpLimit) {
-        super(name, runLimit, swimLimit, jumpLimit);
+    public Cat(String name, float runLimit, float swimLimit, float jumpLimit) {
+        super("Кошка", name, runLimit, swimLimit, jumpLimit);
     }
 }
