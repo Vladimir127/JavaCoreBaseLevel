@@ -6,7 +6,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Random;
 
-/** Паенль, на котором будет отображаться игровое поле и проходить игра */
+/** Панель, на котором будет отображаться игровое поле и проходить игра */
 public class GameMap extends JPanel {
     // Константы для обозначения режимов игры
     public static final int GAME_MODE_HUMAN_VS_AI = 0;
@@ -40,11 +40,16 @@ public class GameMap extends JPanel {
     private int cellWidth;
     private int cellHeight;
 
+    private final Color GAME_MAP_COLOR = new Color(23, 73, 62);
+    private final Color LINE_COLOR = Color.WHITE;
+    private final Color DOT_HUMAN_COLOR = Color.RED;
+    private final Color DOT_AI_COLOR = Color.ORANGE;
+
     /**
      * Инициализирует экземпляр класса
      */
     GameMap(){
-        setBackground(Color.BLACK);
+        setBackground(GAME_MAP_COLOR);
 
         addMouseListener(new MouseAdapter() {
             @Override
@@ -159,7 +164,7 @@ public class GameMap extends JPanel {
         cellHeight = height / fieldSizeY;
 
         // Устанавливаем цвет кисти для рисования линий
-        g.setColor(Color.white);
+        g.setColor(LINE_COLOR);
 
         // Рисуем линии по горизонтали
         for (int i = 0; i < fieldSizeY; i++) {
@@ -182,17 +187,38 @@ public class GameMap extends JPanel {
                     continue;
                 }
 
+                // Приводим объект Graphics к типу Graphics2D и далее будем рисовать на нём
+                // (это нужно, чтобы у нас была возможность задать дополнительные настройки линий).
+                Graphics2D g2 = (Graphics2D) g; // TODO: Законспектировать
+
+                Stroke stroke = new BasicStroke(7, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+
+                int padding = 10;
+
                 // Если соответствующая ячейка массива содержит знак человека,
-                // рисуем синий круг
+                // рисуем красный крестик
                 if (field[y][x] == DOT_HUMAN) {
-                    g.setColor(new Color(1,1,255));
-                    g.fillOval(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
+                    g2.setColor(DOT_HUMAN_COLOR);
+                    g2.setStroke(stroke);
+                    g2.drawLine(x * cellWidth + padding,
+                            y * cellHeight + padding,
+                            (x + 1) * cellWidth - padding,
+                            (y + 1) * cellHeight - padding);
+
+                    g2.drawLine(x * cellWidth + padding,
+                            (y + 1) * cellHeight - padding,
+                            (x + 1) * cellWidth - padding,
+                            y * cellHeight + padding);
                 }
 
-                // Если ячейка содержит знак компьютера, рисуем красный круг
+                // Если ячейка содержит знак компьютера, рисуем жёлтый нолик
                 else if (field[y][x] == DOT_AI) {
-                    g.setColor(Color.RED);
-                    g.fillOval(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
+                    g2.setColor(DOT_AI_COLOR);
+                    g2.setStroke(stroke);
+                    g2.drawOval(x * cellWidth + padding,
+                            y * cellHeight + padding,
+                            cellWidth - padding * 2,
+                            cellHeight - padding * 2);
                 }
 
                 // Если что-то пошло не так, и программа не смогла отрисовать ни крестик, ни нолик,
@@ -217,22 +243,28 @@ public class GameMap extends JPanel {
     private void showMessageGameOver(Graphics g) {
         // Устанавливаем для фонового прямоугольника серый цвет и отрисовываем его
         g.setColor(Color.GRAY);
-        g.fillRect(0, 200, getWidth(), 70);
+
+        // Вычисляем координату Y плашки с подсказкой,
+        // чтобы по вертикали она была выровнена по центру
+        int height = getHeight();
+        int y = (height - 70) / 2;
+
+        g.fillRect(0, y, getWidth(), 70);
 
         // Устанавливаем для текста цвет и шрифт.
         g.setColor(Color.ORANGE);
-        g.setFont(new Font("Times New Roman", Font.BOLD, 45));
+        g.setFont(new Font("Arial", Font.BOLD, 45));
 
         // В зависимости от результата игры выводим соответствующее сообщение
         switch (stateGameOver) {
             case STATE_DRAW:
-                g.drawString("Ничья", 180, getHeight() / 2);
+                g.drawString("Ничья", 180, y + 50);
                 break;
             case STATE_WIN_HUMAN:
-                g.drawString("Победил человек", 100, getHeight() / 2);
+                g.drawString("Победил человек", 50, y + 50);
                 break;
             case STATE_WIN_AI:
-                g.drawString("Победил ИИ", 120, getHeight() / 2);
+                g.drawString("Победил ИИ", 100, y + 50);
                 break;
             default:
                 throw new RuntimeException("Unexpected game over state: " + stateGameOver);
