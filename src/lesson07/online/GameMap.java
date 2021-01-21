@@ -21,6 +21,8 @@ public class GameMap extends JPanel {
     private static final int STATE_DRAW = 0;
     private static final int STATE_WIN_HUMAN = 1;
     private static final int STATE_WIN_AI = 2;
+    private static final int STATE_WIN_PLAYER_1 = 3;
+    private static final int STATE_WIN_PLAYER_2 = 4;
 
     /** Флаг завершения игры */
     private boolean isGameOver;
@@ -28,6 +30,9 @@ public class GameMap extends JPanel {
 
     /** Состояние завершенной игры - принимает значение одной из констант, объявленных выше */
     private int stateGameOver;
+
+    /** Режим игры - человек против компьютера или против другого человека */
+    private int mode;
 
     public static final Random RANDOM = new Random();
 
@@ -44,6 +49,8 @@ public class GameMap extends JPanel {
     private final Color LINE_COLOR = Color.WHITE;
     private final Color DOT_HUMAN_COLOR = Color.RED;
     private final Color DOT_AI_COLOR = Color.ORANGE;
+
+    private int playerNumber = 1;
 
     /**
      * Инициализирует экземпляр класса
@@ -73,6 +80,8 @@ public class GameMap extends JPanel {
         this.fieldSizeY = fieldSizeY;
         this.winLength = winLength;
         field = new int[fieldSizeX][fieldSizeY];
+
+        this.mode = mode;
 
         isGameOver = false;
         initializedMap = true;
@@ -117,12 +126,30 @@ public class GameMap extends JPanel {
             return;
         }
 
-        // Ставим знак человека в соответствующий элемент массива
-        field[cellY][cellX] = DOT_HUMAN;
+        // Ставим нужный знак в соответствующий элемент массива
+        if (mode == GAME_MODE_HUMAN_VS_AI) {
+
+            // Если человек против компьютера, ставим знак человека
+            field[cellY][cellX] = DOT_HUMAN;
+
+        } else if (mode == GAME_MODE_HUMAN_VS_HUMAN) {
+            // Если человек против человека, то будем считать знак человека
+            // знаком первого игрока, а знак компьютера - знаком второго игрока
+            if (playerNumber == 1){
+                field[cellY][cellX] = DOT_HUMAN;
+            } else {
+                field[cellY][cellX] = DOT_AI;
+            }
+        }
 
         // Проверяем, не выиграл ли человек, и если выиграл, объявляем конец игры
         if (checkWin(DOT_HUMAN)) {
-            setGameOver(STATE_WIN_HUMAN);
+
+            if (mode == GAME_MODE_HUMAN_VS_AI) {
+                setGameOver(STATE_WIN_HUMAN);
+            } else if (mode == GAME_MODE_HUMAN_VS_HUMAN) {
+                setGameOver(STATE_WIN_PLAYER_1);
+            }
             return;
         }
 
@@ -132,15 +159,31 @@ public class GameMap extends JPanel {
             return;
         }
 
-        // Если не произошла ни победа человека, ни ничья, делаем ход компьютера
-        aiTurn();
+        // Если режим игры - человек против компьютера, делаем ход компьютера
+        if (mode == GAME_MODE_HUMAN_VS_AI){
+            aiTurn();
+        }
+
+        // Иначе, если режим игры - человек против человека,
+        else if (mode == GAME_MODE_HUMAN_VS_HUMAN){
+            // Меняем номер игрока
+            if (playerNumber == 1){
+                playerNumber = 2;
+            } else {
+                playerNumber = 1;
+            }
+        }
 
         // Перерисовываем игровое поле
         repaint();
 
         // Проверяем, не выиграл ли компьютер, и если выиграл, объявляем конец игры
         if (checkWin(DOT_AI)){
-            setGameOver(STATE_WIN_AI);
+            if (mode == GAME_MODE_HUMAN_VS_AI) {
+                setGameOver(STATE_WIN_AI);
+            } else if (mode == GAME_MODE_HUMAN_VS_HUMAN) {
+                setGameOver(STATE_WIN_PLAYER_2);
+            }
             return;
         }
         if (isFullMap()) {
@@ -155,6 +198,9 @@ public class GameMap extends JPanel {
      * @param g Объект Graphics
      */
     private void render(Graphics g){
+        if (!initializedMap)
+            return;
+
         // Получаем ширину и высоту панели, на которой будет расчерчено игровое поле
         int width = getWidth();
         int height = getHeight();
@@ -189,7 +235,7 @@ public class GameMap extends JPanel {
 
                 // Приводим объект Graphics к типу Graphics2D и далее будем рисовать на нём
                 // (это нужно, чтобы у нас была возможность задать дополнительные настройки линий).
-                Graphics2D g2 = (Graphics2D) g; // TODO: Законспектировать
+                Graphics2D g2 = (Graphics2D) g;
 
                 Stroke stroke = new BasicStroke(7, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
 
@@ -265,6 +311,12 @@ public class GameMap extends JPanel {
                 break;
             case STATE_WIN_AI:
                 g.drawString("Победил ИИ", 100, y + 50);
+                break;
+            case STATE_WIN_PLAYER_1:
+                g.drawString("Победил игрок №1", 30, y + 50);
+                break;
+            case STATE_WIN_PLAYER_2:
+                g.drawString("Победил игрок №2", 30, y + 50);
                 break;
             default:
                 throw new RuntimeException("Unexpected game over state: " + stateGameOver);
